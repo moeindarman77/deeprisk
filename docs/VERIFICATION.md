@@ -1,7 +1,7 @@
 # Verification & Reproducibility
 
 This repo's outputs were validated against the reference EDM implementation
-(`<ARRGEN_SRC>`) and the L2 training script
+(`models/01-global/arrgen`) and the L2 training script
 (`hrrr_model/.../train_hrrr_l2_transformer.py`). The detailed historical write-ups
 are preserved in [`../_archive/docs_originals/`](../_archive/docs_originals/)
 (`GROUND_TRUTH_COMPARISON.md`, `HYPERPARAMETER_VERIFICATION.md`, `MEASUREMENT_VERIFICATION.md`,

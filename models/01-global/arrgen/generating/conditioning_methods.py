@@ -63,9 +63,15 @@ class SuperResolutionOperator:
         return data - self.transpose(self.forward(data)) + self.transpose(measurement)
     
 class IGRAOperator:
-    def __init__(self, lat = np.load("<HRRR_DATA>/lat_lon_arrays.npz")['hrrr_lats'],
-            lon = np.load("<HRRR_DATA>/lat_lon_arrays.npz")['hrrr_lons'],   mode="bicubic"):
+    def __init__(self, lat=None, lon=None, mode="bicubic"):
         super().__init__()
+        # Lazy defaults: the original evaluated np.load(...) in the signature, i.e. at import
+        # time, so the module could not be imported without the HRRR grid file. Behaviour is
+        # unchanged when lat/lon are passed or when the file exists.
+        if lat is None:
+            lat = np.load("<HRRR_DATA>/lat_lon_arrays.npz")['hrrr_lats']
+        if lon is None:
+            lon = np.load("<HRRR_DATA>/lat_lon_arrays.npz")['hrrr_lons']
         self.lat = torch.tensor(lat).float()
         self.lon = torch.tensor(lon).float() 
         self.lon = self.lon - self.lon.max()/2 
@@ -141,8 +147,7 @@ class IGRAOperator:
 
 class SR_IGRA_Operator:
     def __init__(self,in_shape=(16,32), target_shape=(128, 256), mode="bicubic",
-                 lat = np.load("<HRRR_DATA>/lat_lon_arrays.npz")['hrrr_lats'],
-            lon = np.load("<HRRR_DATA>/lat_lon_arrays.npz")['hrrr_lons'],) :
+                 lat=None, lon=None):  # lazy defaults, see IGRAOperator
         self.SR = SuperResolutionOperator(in_shape=in_shape,target_shape=target_shape,mode=mode)
         self.IGRA = IGRAOperator(lat=lat,lon=lon,mode=mode) 
     

@@ -261,10 +261,10 @@ class DiffusionSampler:
         return x_next
 
 class PosteriorDiffusionSampler:
-    def __init__(self, net,):
+    def __init__(self, net, in_shape=(48,96)):
         super().__init__()
         self.net = net
-        self.sr = SuperResolutionOperator(in_shape = (48,96),target_shape=(720,1440)) #  #
+        self.sr = SuperResolutionOperator(in_shape = in_shape,target_shape=(720,1440)) #  #
         # self.sr = IGRAOperator()
         # self.sr = SR_IGRA_Operator()
         self.cm = ConditioningMethod(self.sr)

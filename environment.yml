@@ -1,0 +1,33 @@
+# Conda environment used to run the DeepRisk pipeline (exported with `conda env export --from-history`
+# from the environment the pipeline was developed in; Python 3.10, PyTorch 2.5.1 + CUDA 12.4).
+# Exact package pins for the imports the pipeline uses are in requirements.txt.
+name: deeprisk
+channels:
+  - conda-forge
+  - pytorch
+  - nvidia
+dependencies:
+  - python=3.10
+  - pytorch=2.5.1
+  - pytorch-cuda=12.4
+  - torchvision
+  - numpy=1.26
+  - xarray
+  - netcdf4
+  - h5py
+  - zarr
+  - dask
+  - pandas
+  - scipy
+  - pyyaml
+  - omegaconf
+  - hydra-core
+  - tqdm
+  - psutil
+  - matplotlib
+  - cartopy
+  - cdsapi          # ERA5 download from the Copernicus CDS (training / validation data)
+  - ipykernel       # for the notebooks
+  - pip
+  - pip:
+      - pynvml      # optional: GPU memory logging in utils/pipeline_enhancements.py

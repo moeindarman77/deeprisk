@@ -159,7 +159,7 @@ class LucieSSTDataset(BaseDataset):
             raise ValueError(
                 f"LUCIE SST data resolution mismatch! "
                 f"Expected (48, 96), got {data_tensor.shape[-2:]}. "
-                f"Ground truth posterior sampler in <ARRGEN_SRC> is hardcoded for (48, 96) input. "
+                f"Ground truth posterior sampler in models/01-global/arrgen is hardcoded for (48, 96) input. "
                 f"Cannot naively downsample - this would require preprocessing the NetCDF file or modifying ground truth code."
             )
 

@@ -1,0 +1,59 @@
+#!/bin/bash
+#PBS -N cam6_postprocess
+#PBS -A <PROJECT_CODE>
+#PBS -q main
+#PBS -l walltime=04:00:00
+#PBS -l select=1:ncpus=4:mem=64GB
+#PBS -j oe
+#PBS -o <WORK>/cases/postprocess_sst/logs/postprocess.log
+
+set -e
+
+SCRIPT_DIR="<WORK>/cases/postprocess_sst"
+OUTPUT_DIR="<SCRATCH>/sst_data/postprocessed"
+
+module load conda
+conda activate jax
+
+mkdir -p ${OUTPUT_DIR}
+mkdir -p ${SCRIPT_DIR}/logs
+
+echo "============================================"
+echo "Processing SSTplus4K"
+echo "Start: $(date)"
+echo "============================================"
+
+python ${SCRIPT_DIR}/process_cam6.py \
+    --experiment SSTplus4K \
+    --output-dir ${OUTPUT_DIR}
+
+echo ""
+echo "============================================"
+echo "Processing SSTcontrol"
+echo "Start: $(date)"
+echo "============================================"
+
+python ${SCRIPT_DIR}/process_cam6.py \
+    --experiment SSTcontrol \
+    --output-dir ${OUTPUT_DIR}
+
+echo ""
+echo "============================================"
+echo "Verifying SSTplus4K output"
+echo "============================================"
+
+python ${SCRIPT_DIR}/verify_output.py \
+    --file ${OUTPUT_DIR}/SSTplus4K_sigma_levels.nc
+
+echo ""
+echo "============================================"
+echo "Verifying SSTcontrol output"
+echo "============================================"
+
+python ${SCRIPT_DIR}/verify_output.py \
+    --file ${OUTPUT_DIR}/SSTcontrol_sigma_levels.nc
+
+echo ""
+echo "============================================"
+echo "All done: $(date)"
+echo "============================================"

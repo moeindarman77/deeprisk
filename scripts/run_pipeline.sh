@@ -41,7 +41,7 @@ set -euo pipefail
 : "${OUTPUT:?Set OUTPUT directory}"
 
 source ~/.bashrc
-conda activate jax
+conda activate deeprisk
 cd <DEEPRISK_ROOT>
 
 export CUDA_VISIBLE_DEVICES="${GPU:-0}"

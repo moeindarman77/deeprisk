@@ -13,9 +13,9 @@ import xarray as xr
 from typing import Any, Dict, Tuple, Union, Optional
 from pathlib import Path
 
-# Add EDM module to path - use the ground truth implementation from <DATA_ROOT>
-# This ensures exact reproducibility with the reference implementation
-sys.path.insert(0, "<ARRGEN_SRC>")
+# The EDM network + posterior sampler come from the `arrgen` package vendored at
+# models/01-global/arrgen (the reference implementation used for the paper runs).
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "models" / "01-global"))
 from arrgen.generating.factory import sampler_factory
 from arrgen.utils import io
 
@@ -127,7 +127,7 @@ class Sample_ORIGINAL(torch.nn.Module):
 class Sample_LUCIE(torch.nn.Module):
     """LUCIE-specific EDM posterior sampling implementation
 
-    Matches ground truth implementation from <ARRGEN_SRC>/arrgen/sample_lucie.py
+    Matches ground truth implementation from models/01-global/arrgen/sample_lucie.py
 
     Key features:
     - Uses edm_pos_sample mode (posterior sampling with likelihood correction)
@@ -302,7 +302,7 @@ class EDMModel(BaseModel):
                 f"  Expected: {expected_shape} (LUCIE posterior sampling requirement)\n"
                 f"  Got: {actual_shape}\n"
                 f"  Full shape: {data.shape}\n\n"
-                f"The ground truth PosteriorDiffusionSampler at <ARRGEN_SRC>\n"
+                f"The ground truth PosteriorDiffusionSampler at models/01-global/arrgen\n"
                 f"has SuperResolutionOperator hardcoded to (48,96) → (720,1440).\n"
                 f"This is NOT the ACE mode (180,360) or unconditional mode.\n"
                 f"Your input data must be at 48×96 resolution for LUCIE downscaling."

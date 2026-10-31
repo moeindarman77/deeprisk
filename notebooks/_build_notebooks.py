@@ -149,10 +149,9 @@ import torch.nn.functional as F
 import xarray as xr
 import pandas as pd
 
-# The EDM model is defined in the external `arrgen` package (the verified
-# reference implementation). It is the one documented external prerequisite —
-# see README "Prerequisites".
-sys.path.insert(0, "<ARRGEN_SRC>")
+# The EDM model is defined in the `arrgen` package vendored at models/01-global/arrgen
+# (the verified reference implementation).
+import os; sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "..", "models", "01-global")))  # vendored arrgen
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from arrgen.generating.diffusion import PosteriorDiffusionSampler

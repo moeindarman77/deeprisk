@@ -1,5 +1,7 @@
 # DeepRisk — Climate Downscaling Pipeline
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23826062.svg)](https://doi.org/10.5281/zenodo.23826062) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A two-stage deep-learning pipeline that downscales coarse global climate-model output to
 high-resolution regional fields, in two steps:
 
@@ -31,7 +33,8 @@ The fastest way to see the pipeline run end-to-end is the explanatory notebooks 
 (Intermediate) first, then Stage 2 (Regional):
 
 ```bash
-conda activate jax
+conda env create -f environment.yml   # once
+conda activate deeprisk
 cd notebooks
 CUDA_VISIBLE_DEVICES=0 jupyter lab     # or: jupyter nbconvert --to notebook --execute "<name>.ipynb"
 ```
@@ -58,13 +61,17 @@ See [`scripts/README.md`](scripts/README.md) for ACE2 / LUCIE examples and `sbat
 
 ## Prerequisites
 
-- **Conda env `jax`** (`conda activate jax`) — provides PyTorch (CUDA), xarray, cartopy, etc.
+- **Python environment**: `conda env create -f environment.yml` (Python 3.10, PyTorch 2.5.1 / CUDA 12.4);
+  exact pins in [`requirements.txt`](requirements.txt).
 - **NVIDIA GPU** (the diffusion stage needs one; ~12 s/sample on an GPU).
-- **External `arrgen` package** — the EDM network class lives in the verified reference
-  implementation at `<ARRGEN_SRC>` and is added to `sys.path` at runtime.
-  This is the **one external dependency** that is *not* vendored into the repo (it is a large
-  separate codebase). Everything else — checkpoints, normalization stats, the orography
-  condition — is vendored under [`models/`](models/).
+- **Model checkpoints** (2.2 GB, not in git): download the three files from Zenodo
+  ([doi:10.5281/zenodo.23826062](https://doi.org/10.5281/zenodo.23826062)) into
+  `models/01-global/checkpoints/` and `models/02-regional/checkpoints/`, then verify with
+  `cd models && sha256sum -c CHECKSUMS.sha256`.
+- The `arrgen` package (EDM network, posterior sampler, Stage-1 training code) is vendored at
+  [`models/01-global/arrgen/`](models/01-global/arrgen/) and put on `sys.path` by the drivers and
+  notebooks, so no external install is needed. Normalization statistics, the orography condition,
+  and the HRRR orography snapshot are vendored under [`models/`](models/).
 
 ## Repository layout
 
@@ -78,11 +85,12 @@ deeprisk/
 │   ├── datasets/                # LUCIE / ACE / CESM loaders
 │   └── pipeline.py
 ├── models/
-│   ├── 01-global/               # EDM (intermediate): checkpoint, stats, condition.npy
-│   └── 02-regional/             # L2 (regional): checkpoints, model code, orography
+│   ├── 01-global/               # EDM (intermediate): arrgen/ (network, sampler, training), stats, condition.npy, checkpoints/ (from Zenodo)
+│   └── 02-regional/             # L2 (regional): model code, config, training/ (training script), orography, checkpoints/ (from Zenodo)
 ├── notebooks/                   # 6 explanatory inference notebooks + sample_data/
 ├── configs/                     # YAML pipeline configs
-├── scripts/                     # run_pipeline.sh + examples/
+├── scripts/                     # run_pipeline.sh + examples/ + preprocessing/cesm/ (CESM input preparation)
+├── environment.yml, requirements.txt
 ├── docs/                        # architecture, verification, testing, CESM methods
 ├── test_scripts/                # smoke tests
 └── _archive/                    # superseded scripts/docs/debug files (kept, not deleted)
@@ -90,8 +98,8 @@ deeprisk/
 
 > **Naming note:** `models/01-global` and `models/02-regional` were previously named
 > `models/edm` and `models/l2`. The new names describe what each stage *does*
-> (intermediate/global vs. regional). `models/01-global/arrgen/` is a reference copy only —
-> the pipeline imports the external arrgen (see Prerequisites).
+> (intermediate/global vs. regional). `models/01-global/arrgen/` is the package the pipeline
+> imports (see Prerequisites).
 
 ## Output format
 
@@ -113,38 +121,45 @@ Both stages write CF-compliant, gzip-compressed NetCDF with a leading `time` dim
 
 ## Code and Data Availability
 
-**Code.** All pipeline code is in this repository (`deeprisk`). The Stage-1 EDM network and
-posterior sampler are imported from the external `arrgen` package (`SR_edm_code`) released with
-Guan, Darman et al. (2026, [arXiv:2602.13416](https://arxiv.org/abs/2602.13416)); point
-`<ARRGEN_SRC>` at it (see Prerequisites).
+**Code.** All pipeline code is in this repository (`deeprisk`, MIT license): the two-stage
+inference pipeline and drivers; the `arrgen` package that defines the Stage-1 EDM network,
+posterior sampler, and training loop (vendored at [`models/01-global/arrgen/`](models/01-global/arrgen/),
+originally released with Guan, Darman et al. 2026, [arXiv:2602.13416](https://arxiv.org/abs/2602.13416));
+the Stage-2 training script ([`models/02-regional/training/`](models/02-regional/training/)); the CESM
+input-preparation scripts ([`scripts/preprocessing/cesm/`](scripts/preprocessing/cesm/)); the inference
+notebooks; and the environment specification ([`environment.yml`](environment.yml),
+[`requirements.txt`](requirements.txt)).
 
 **Model weights.** The three checkpoints (`models/01-global/checkpoints/checkpoint-007862.pt`,
 `models/02-regional/checkpoints/best_l2_model.pth`,
-`models/02-regional/checkpoints/l2_transformer_v07_fft005_best.pth`; ~2.2 GB total) are not
-tracked in git. They are distributed separately *(archive DOI to be added)*; place them at the
-paths above after cloning. Normalization statistics, the surface-geopotential conditioning field,
-and the HRRR orography snapshot are vendored under [`models/`](models/).
+`models/02-regional/checkpoints/l2_transformer_v07_fft005_best.pth`; 2.2 GB total) are archived on
+Zenodo: [doi:10.5281/zenodo.23826062](https://doi.org/10.5281/zenodo.23826062). Place them at the paths
+above after cloning and verify with `cd models && sha256sum -c CHECKSUMS.sha256`. Normalization
+statistics, the surface-geopotential conditioning field, and the HRRR orography snapshot are vendored
+under [`models/`](models/).
 
-**Data.** The climate-model inputs and the multi-terabyte downscaled outputs are not distributed
-with this repository, but every dataset can be regenerated from public sources as follows. The two
-models were trained on public products: Stage 1 (EDM) on ERA5 (Copernicus Climate Data Store;
-0.25°, 6-hourly; 2-m temperature, specific humidity at model level 133, u/v wind at model level 83,
-6-h accumulated precipitation, with surface geopotential as static conditioning) and Stage 2
-(L2 Transformer) on paired ERA5 → HRRR fields (NOAA HRRR, ~3 km CONUS; 2-m temperature,
-accumulated precipitation, terrain elevation). The coarse inputs are control and +4 K
-prescribed-SST (AMIP-style) simulations for 2015–2022 at 6-hourly cadence from three models:
-CESM 2.1.5 (compset `SSP370_CAM60_CLM50%BGC-CROP_CICE%PRES_DOCN%DOM_MOSART_SGLC_SWAV`, grid
-`f09_f09_mg17`, HadOIBl monthly SST/sea-ice climatology; the +4 K run adds a uniform 4.0 K to
-`SST_cpl` with `ncap2`, sea ice unchanged; 6-hourly `h1` output interpolated log-pressure to
-σ = 0.95 for T, q and σ = 0.34 for u, v — full recipe in [`docs/CESM.md`](docs/CESM.md)), and the
-LUCIE-3D ([arXiv:2509.02061](https://arxiv.org/abs/2509.02061)) and ACE2 (Watt-Meyer et al. 2025,
-*npj Clim. Atmos. Sci.* 8:205) emulators run from their public releases, initialized from ERA5 on
-1 January 2015 with ERA5-derived SST forcing; the +4 K run adds 4 K at ocean points (land–sea
-mask) with Gaussian coastal blending (σ = 1.7 grid cells, up to 20 cells from the coast) and the
-control is processed identically with a 0 K offset. The downscaled intermediate (0.25°) and
-regional (3 km) fields are then reproduced by running the drivers in this repository on those
-inputs (`run_cesm_pipeline.py`, `run_ace_pipeline.py`, `run_integrated_pipeline.py`);
-ten-timestep excerpts of each coarse input are included under
+**Data.** All inputs are public, and every derived dataset can be regenerated from them:
+
+| Dataset | Role | Source |
+|---|---|---|
+| ERA5, 0.25°, 6-hourly (2-m temperature, specific humidity at model level 133, u/v wind at model level 83, 6-h precipitation, surface geopotential) | Stage-1 training target, normalization statistics, emulator initial conditions, Stage-1 validation | [Copernicus Climate Data Store](https://cds.climate.copernicus.eu/) |
+| HRRR, ~3 km CONUS (2-m temperature, accumulated precipitation, terrain) | Stage-2 training target, output statistics, Stage-2 validation | [NOAA HRRR archive on AWS Open Data](https://registry.opendata.aws/noaa-hrrr-pds/) |
+| CESM 2.1.5 control and +4 K runs | Coarse input, 192×288 | [CESM source](https://github.com/ESCOMP/CESM); run recipe in [`docs/CESM.md`](docs/CESM.md); SST file and post-processing in [`scripts/preprocessing/cesm/`](scripts/preprocessing/cesm/) |
+| LUCIE-3D control and +4 K runs | Coarse input, 48×96 | [LUCIE-3D release, Zenodo record 17032361](https://zenodo.org/records/17032361) |
+| ACE2 control and +4 K runs | Coarse input, 180×360 | [ai2cm/ace](https://github.com/ai2cm/ace); ERA5-trained checkpoint [doi:10.57967/hf/5377](https://doi.org/10.57967/hf/5377) |
+
+The climate-model runs are control and +4 K prescribed-SST (AMIP-style) simulations for 2015–2022 at
+6-hourly cadence. For CESM, the +4 K run adds a uniform 4.0 K to the HadOIBl SST climatology with sea
+ice unchanged ([`make_sst_plus4k.sh`](scripts/preprocessing/cesm/make_sst_plus4k.sh)), and the 6-hourly
+output is interpolated to σ = 0.95 (T, q) and σ = 0.34 (u, v)
+([`process_cam6.py`](scripts/preprocessing/cesm/process_cam6.py)). For LUCIE-3D and ACE2, the models
+are initialized from ERA5 on 1 January 2015 with ERA5-derived SST forcing; the +4 K run adds 4 K at
+ocean points (land–sea mask) with Gaussian coastal blending (σ = 1.7 grid cells, up to 20 cells from
+the coast), and the control is processed identically with a 0 K offset. The script that applied this
+perturbation to the emulator forcing files is not included here; the procedure is fully specified
+above and in the paper's Methods. The downscaled intermediate (0.25°) and regional (3 km) fields are
+reproduced by running the drivers on those inputs (`run_cesm_pipeline.py`, `run_ace_pipeline.py`,
+`run_integrated_pipeline.py`). Ten-timestep excerpts of each coarse input are included under
 [`notebooks/sample_data/`](notebooks/sample_data/) so the notebooks run end-to-end without the full
 datasets. Stage 1 is stochastic (see [`ISSUES.md`](ISSUES.md)), so regenerated outputs match
 statistically but not bit-for-bit.

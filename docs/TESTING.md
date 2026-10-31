@@ -3,7 +3,7 @@
 ## Environment
 
 ```bash
-source ~/.bashrc && conda activate jax     # PyTorch+CUDA, xarray, cartopy, jupyter, ...
+source ~/.bashrc && conda activate deeprisk     # PyTorch+CUDA, xarray, cartopy, jupyter, ...
 # GPU required for inference; pick a free device, e.g. export CUDA_VISIBLE_DEVICES=0
 ```
 
@@ -55,7 +55,7 @@ checkpoints are vendored here. Commands, for reference:
 
 **Stage 1 — EDM (arrgen, Hydra, multi-GPU):**
 ```bash
-cd <ARRGEN_SRC>
+cd models/01-global/arrgen
 torchrun --nproc_per_node=<N> -m arrgen.train experiment=era5_0.25   # see arrgen/configs/
 ```
 

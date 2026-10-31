@@ -10,7 +10,7 @@ Batch (SLURM) entry points for running the downscaling pipeline at scale.
 | `examples/lucie_co2.sh` | LUCIE CO2 experiment 0, first 100 timesteps. |
 
 Notes:
-- Activate the conda env first (`conda activate jax`); `run_pipeline.sh` does this for you.
+- Activate the conda env first (`conda activate deeprisk`); `run_pipeline.sh` does this for you.
 - The SLURM `--output`/`--error` directory must exist **before** `sbatch`; the examples `mkdir -p` it.
 - Outputs are written to `/space` (ample free space); avoid `/data` (near full).
 - The ~90 historical per-experiment scripts were moved to `../_archive/scripts_experiments/`.

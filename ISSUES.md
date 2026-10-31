@@ -5,12 +5,11 @@ Status as of the shipping pass. Resolved items from older docs are folded into
 
 ## Open
 
-1. **External `arrgen` dependency (not vendored).** The EDM network class is imported from
-   `<ARRGEN_SRC>` at runtime (added to `sys.path`). The repo is otherwise
-   self-contained (checkpoints, stats, `condition.npy`, orography are vendored under `models/`).
-   To make it fully portable, vendor or `pip install -e` the arrgen package and drop the
-   hard-coded `sys.path.insert`. *Impact: the pipeline will not run on a machine without that
-   path.* `models/01-global/arrgen/` is a stale partial copy (not imported) — do not rely on it.
+1. **Emulator SST-forcing perturbation script not included.** The +4 K forcing files for
+   LUCIE-3D and ACE2 were produced by a script (ocean-only +4 K with Gaussian coastal blending,
+   σ = 1.7 grid cells, up to 20 cells from the coast; control processed with 0 K) that is not in
+   this repository. The procedure is specified in README "Code and Data Availability" and in the
+   paper's Methods; re-implementing it is straightforward but has not been done here.
 
 2. **No bit-exact reproducibility (by design).** The Stage-1 diffusion sampler is stochastic;
    the churn step uses the unseeded global RNG and CUDA kernels are non-deterministic, so runs
@@ -43,6 +42,14 @@ Status as of the shipping pass. Resolved items from older docs are folded into
    units attribute in a future, deliberate change.
 
 ## Resolved (folded into current docs)
+
+- External `arrgen` dependency: the package is now vendored at `models/01-global/arrgen/` (the
+  working copy used for the paper runs, scrubbed of local paths) and imported through a
+  repository-relative `sys.path` entry in the drivers, `core/models/edm_model.py`, and the
+  notebooks. Two classes (`IGRAOperator`, `SR_IGRA_Operator`) loaded an HRRR grid file in their
+  default arguments, i.e. at import time; those defaults are now lazy so the module imports anywhere.
+  Verified: imports succeed and `checkpoint-007862.pt` loads into the vendored network with strict
+  key matching.
 
 - CESM input data located and validated (`<CESM_DATA>/*_sigma_levels.nc`); all 6
   notebooks run end-to-end and CESM is cross-validated against pre-existing outputs.

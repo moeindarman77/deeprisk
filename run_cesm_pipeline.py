@@ -30,14 +30,14 @@ import pandas as pd
 from tqdm import tqdm
 
 # Same arrgen codebase as LUCIE/ACE
-sys.path.insert(0, "<ARRGEN_SRC>")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "01-global"))  # vendored arrgen
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from arrgen.generating.diffusion import PosteriorDiffusionSampler
 from arrgen.generating.conditioning_methods import SuperResolutionOperator, ConditioningMethod
 
 # L2 model (regional downscaling)
-sys.path.insert(0, "<DEEPRISK_ROOT>/models/02-regional")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "02-regional"))
 from models.TransformerUNet_L2 import TransformerUNet_L2_WithConditioning
 
 warnings.filterwarnings("ignore", category=UserWarning)

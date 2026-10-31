@@ -23,7 +23,7 @@ from collections import defaultdict
 from tqdm import tqdm
 
 # Use same arrgen codebase as LUCIE
-sys.path.insert(0, "<ARRGEN_SRC>")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "01-global"))  # vendored arrgen
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from arrgen.generating.diffusion import PosteriorDiffusionSampler
