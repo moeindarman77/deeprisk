@@ -1,0 +1,3 @@
+_target_: arrgen.training.loss.FMLoss
+name: cfm
+sigma: 0.0

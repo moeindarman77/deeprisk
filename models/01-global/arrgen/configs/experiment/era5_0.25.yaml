@@ -1,0 +1,40 @@
+# @package _global_
+defaults:
+  - /data: era5_0.25
+  - /model: unet_sr
+  - /loss: edm
+  - /precond: edm
+  - override /optimizer: adamw
+
+optimizer:
+  lr: 0.0001
+
+model:
+  in_channels : 5
+  out_channels : 5
+  inner_channel : 32
+  norm_groups : 32
+  channel_mults : [1,2, 4, 8, 16]
+  attn_res : []
+  res_blocks : 3
+  dropout : 0
+
+loss:
+  P_mean: 0
+  P_std: 2
+  sigma_data: 1.2
+
+data:
+  batch_size: 48
+  data_workers: 4
+
+trainer:
+  total_kimg: 50000 # 50 mimg
+  lr_rampup_kimg: 5000 # 5 mimg
+  lr_min_factor: 0.05
+  kimg_per_tick: 5
+  checkpoint_ticks: 20 # every 20x5 kimg 
+  conditional: True
+  checkpoint_dir: "<ARRGEN_SRC>/src/results/era5_0.25/20250710_075655/checkpoints" #restart - put path to checkpoint here
+
+experiment_name: era5_0.25

@@ -1,0 +1,15 @@
+defaults:
+  - defaults
+
+dataset:
+  _target_: arrgen.data.era5_sr.ERA5SR
+  root: "<SCRATCH>/0.25deg_ERA5"
+  split: train
+  conditions: 1
+  variables: 
+    - 2m_temperature
+    - specific_humidity_133
+    - u_component_of_wind_83
+    - v_component_of_wind_83
+    - total_precipitation_6hr
+    - geopotential_at_surface

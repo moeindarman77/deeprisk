@@ -1,0 +1,4 @@
+_target_: arrgen.training.loss.EDM2Loss
+P_mean: -0.4
+P_std: 1.0
+sigma_data: 1

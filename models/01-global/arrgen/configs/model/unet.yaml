@@ -1,0 +1,3 @@
+_target_: arrgen.models.unet.UNet
+depth: 2
+initial_filters: 8

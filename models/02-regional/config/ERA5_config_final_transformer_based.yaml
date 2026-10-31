@@ -1,0 +1,99 @@
+dataset_params:
+  input_data_dir: '<ERA5_HR_DATA>/0.25_era5_2010-2017'
+  output_data_dir: '<HRRR_DATA>/data/hrrr'
+  year_range_start: 2015
+  year_range_end: 2017
+  normalize: True
+  input_normalization_dir: '<SCRATCH>/lucie/stats_hr_2000_2009_updated.npz'
+  output_normalization_dir: '<SCRATCH>/hrrr/grib2_stats_final.json'
+  cache_file: '<SCRATCH>/lucie/valid_files.npz'
+  cache_file_hrrr: "<SCRATCH>/hrrr/cache_hrrr_2015_2017.npz"
+  force_recompute: False
+  lucie_file_path: '<SCRATCH>/lucie/LUCIE_inference_start2010.npz'
+  input_channels: 8
+  output_channels: 4
+  
+  land_sea_mask: 0 # 1 for True, 0 for False
+  land_sea_mask_dir: '<SCRATCH>/lucie/lsm.npz'
+  name: 'celebhq'
+
+diffusion_params:
+  num_timesteps : 1000
+  beta_start : 0.0001
+  beta_end : 0.02
+  power: 3.5
+
+fno_params:
+  modes1: 180
+  modes2: 360
+  width: 20
+
+ddpm_fno_params:
+  modes1: 180
+  modes2: 360
+  width: 20
+  time_emb_dim: 512
+
+ldm_params:
+  down_channels: [ 256, 384, 512, 768 ]
+  # down_channels: [ 32, 64, 128]
+  mid_channels: [ 768, 512 ]
+  # mid_channels: [ 128, 64]
+  down_sample: [ True, True, False]
+  attn_down : [False, False, True]
+  # attn_down : [True, True]
+  time_emb_dim: 512
+  norm_channels: 32
+  num_heads: 1
+  conv_out_channels : 128
+  num_down_layers : 2
+  num_mid_layers : 2
+  num_up_layers : 2
+  condition_config:
+    condition_types: ['image']
+    image_condition_config:
+      image_condition_input_channels: 3
+      image_condition_output_channels: 3
+      image_condition_h : 352
+      image_condition_w : 608
+      cond_drop_prob: 0.1
+
+train_params:
+  # General training settings
+  seed: 1111  # Random seed for reproducibility
+  task_name: 'v08_lazy'  # Name of the current training task
+  description : 'testing transformer-based with orography, its trained on the differnece of the hrrr and ERA5 and later in the sampling, the hres should be added to the predicted noise, now its used in lazy diff setup'  # Description of the training task
+  results_dir: '<HRRR_MODEL_SRC>/results'  # Directory to save results: task_dir = os.path.join(results_dir, train_config['task_name'])
+  load_dir: '<HRRR_MODEL_SRC>/results'  # Directory to load results from
+  load_from_checkpoint: True  # Whether to load the model from a previous checkpoint
+  fno_resume_ckpt_path: '<HRRR_MODEL_SRC>/results/fno_v2/checkpoints/latest_epoch.pth'  # Path to the model checkpoint
+
+  # Batch sizes and memory-related configurations
+  ldm_batch_size: 16  # Batch size for latent diffusion model (LDM) training (limited by GPU capacity: for an HPC cluster 1 per GPU)
+  fno_batch_size: 8  # Batch size for FNO training (limited by GPU capacity: for an HPC cluster 4 per GPU) 
+  
+  # Weights for other loss components
+  lambda_fft: 0.2  # Weight for FFT loss
+
+  # Training duration
+  ldm_epochs: 200  # Number of epochs for training the latent diffusion model (LDM)
+  fno_epochs: 100  # Number of epochs for training the FNO model
+
+  # Learning rates for different models
+  ldm_lr: 0.00001  # Learning rate for the latent diffusion model (LDM)
+  fno_lr: 0.001  # Learning rate for the FNO model
+
+  # Scheduler settings for learning rate decay
+  scheduler_step_size_g: 10  # Step size for learning rate scheduler (generator)
+  scheduler_gamma_g: 0.90  # Gamma for learning rate decay (generator)
+  
+  # Gradient accumulation settings
+  fno_accumulation_steps: 1  # Number of steps to accumulate gradients for autoencoder
+
+  # Checkpoint and saving settings
+  ldm_save_interval: 10  # Interval (in epochs) to save LDM checkpoints
+  checkpoint_interval: 10  # Interval (in epochs) to save model checkpoints
+
+  # Checkpoint file names
+  ldm_ckpt_name: 'ddpm_ckpt.pth'  # Checkpoint file name for LDM
+  fno_ckpt_name: 'fno_ckpt.pth'  # Checkpoint file name for FNO model

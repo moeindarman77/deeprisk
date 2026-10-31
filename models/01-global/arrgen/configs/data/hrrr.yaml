@@ -1,0 +1,16 @@
+dataset:
+  _target_: arrgen.data.fast_loader_v2.HRRRERA5Dataset
+  hrrr_path: "<SCRATCH>/hrrr/hrrr_data_2015_2024_t2m_acpc.h5"
+  era5_dir: "<SCRATCH>/ERA5_2015_2024_T_tp6hr/"
+  era5_vars:
+    - "2m_temperature"
+    - "total_precipitation_6hr"
+  era5_crop:
+    "2m_temperature": [164, 260, 940, 1172]
+    "total_precipitation_6hr": [164, 260, 940, 1172]
+  normalize_hrrr: true
+  hrrr_mean: [287.03198, 0.60624385]
+  hrrr_std: [11.774148, 3.5890427]
+  normalize_era5: true
+  era5_mean: [2.8765552e+02, 2.0106704e-04]
+  era5_std: [1.1323586e+01, 1.1152735e-03]

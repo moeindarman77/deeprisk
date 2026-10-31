@@ -1,0 +1,56 @@
+# ACE Dataset Loader Configuration
+# Normalization and preprocessing settings for ACE CO2 experiments
+
+# Data paths
+data:
+  ace_root: "<ACE_ROOT>"
+  predictions_file: "autoregressive_predictions.nc"
+  variable_map: "configs/ace_variable_map.yaml"
+
+# Normalization strategy
+normalization:
+  # Reuse EDM normalization stats from LUCIE training
+  strategy: "reuse_edm_stats"
+  stats_dir: "<DEEPRISK_ROOT>/models/01-global/stats"
+
+  # Apply same preprocessing as LUCIE dataset
+  precipitation:
+    log_transform: true
+    log_params:
+      clip_min: 1.0e-10
+      clip_max: 1.0e10
+      scale_factor: 1.1e-4
+      offset: 0.17
+    description: "log(clip(precip, 1e-10, 1e10) / 1.1e-4 + 1) + 0.17"
+
+# Memory management
+memory:
+  # No chunking - loop over time if needed
+  use_chunking: false
+  lazy_loading: true  # Load data on-demand per sample
+  cache_dataset: false  # Don't cache entire dataset in RAM
+
+# Dataset dimensions
+dimensions:
+  n_channels: 5  # temp, humidity, u_wind, v_wind, precip
+  spatial_shape: [180, 360]  # ACE native resolution (lat, lon)
+  time_steps: 29219  # Available time steps per experiment
+
+# Processing
+processing:
+  transpose_to_channels_first: true  # (time, lat, lon, channels) -> (time, channels, lat, lon)
+  squeeze_sample_dim: true  # Remove singleton sample dimension
+
+# Variable stacking order (must match LUCIE)
+variable_order:
+  - "temperature"          # channel 0
+  - "specific_humidity"    # channel 1
+  - "u_component_of_wind"  # channel 2
+  - "v_component_of_wind"  # channel 3
+  - "tp6hr"                # channel 4 (precipitation)
+
+# Notes:
+# - ACE resolution (180x360) differs from LUCIE (48x96) but pipeline handles this
+# - Normalization reuses LUCIE/EDM stats for consistency
+# - No chunking to avoid memory fragmentation
+# - Per-sample iteration to control memory usage

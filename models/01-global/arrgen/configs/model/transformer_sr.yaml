@@ -1,0 +1,11 @@
+model:
+  _target_: arrgen.models.TransformerUNet.TransformerUNet
+  img_resolution: [960, 1560]
+  in_channels: 2
+  out_channels: 2
+  cond_channels: 3
+  down_channels: [128, 256, 512, 512]
+  up_channels: [512, 512, 256, 128]
+  time_emb_dim: 512
+  trans_layers: 4
+  trans_heads: 8

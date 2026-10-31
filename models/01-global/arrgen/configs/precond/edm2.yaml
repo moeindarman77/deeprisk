@@ -1,0 +1,4 @@
+_target_: arrgen.models.precond.EDM2Precond
+sigma_min: 0
+sigma_max: 100
+sigma_data: 1

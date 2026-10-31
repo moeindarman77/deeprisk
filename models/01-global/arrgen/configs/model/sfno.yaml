@@ -1,0 +1,2 @@
+# SFNO operator
+_target_: arrgen.models.sfno.SFNO_diffusion

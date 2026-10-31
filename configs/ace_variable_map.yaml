@@ -1,0 +1,96 @@
+# ACE to DeepRisk Pipeline Variable Mapping
+# Maps ACE model output variables to the format expected by EDM+L2 pipeline
+
+# Source: ACE autoregressive_predictions.nc files
+# Target: 5-channel format matching LUCIE dataset contract
+
+variables:
+  # Channel 0: 2m Temperature (diagnostic height)
+  # CHANGED from air_temperature_7 to TMP2m to match EDM training (2024-10-29)
+  # Original 0.25deg ERA5 training used '2m_temperature'
+  # TMP2m (2m above ground) is ~1.4K warmer than air_temperature_7 (hybrid level 7)
+  - ace_name: "TMP2m"
+    lucie_name: "temperature"
+    level: null  # Diagnostic height (2m), not a model level
+    units_from: "K"
+    units_to: "K"
+    transform: "none"  # No conversion needed
+    description: "2-meter air temperature (diagnostic, matches EDM training)"
+
+  # Channel 1: Specific humidity at level 7
+  - ace_name: "specific_total_water_7"
+    lucie_name: "specific_humidity"
+    level: 7
+    units_from: "kg kg**-1"
+    units_to: "kg kg**-1"
+    transform: "none"  # No conversion needed
+    description: "Specific total water at model level 7"
+
+  # Channel 2: U-component of wind at level 3
+  - ace_name: "eastward_wind_3"
+    lucie_name: "u_component_of_wind"
+    level: 3
+    units_from: "m s**-1"
+    units_to: "m s**-1"
+    transform: "none"  # No conversion needed
+    description: "Eastward wind component at model level 3"
+
+  # Channel 3: V-component of wind at level 3
+  - ace_name: "northward_wind_3"
+    lucie_name: "v_component_of_wind"
+    level: 3
+    units_from: "m s**-1"
+    units_to: "m s**-1"
+    transform: "none"  # No conversion needed
+    description: "Northward wind component at model level 3"
+
+  # Channel 4: Precipitation rate (convert to 6hr total)
+  - ace_name: "PRATEsfc"
+    lucie_name: "tp6hr"
+    level: null
+    units_from: "kg m**-2 s**-1"  # Precipitation rate
+    units_to: "m"  # 6hr accumulated precipitation in meters
+    transform: "rate_to_accumulation"  # Convert rate to 6hr total
+    transform_params:
+      time_delta_hours: 6
+      density_water: 1000.0  # kg/m^3
+    description: "Surface precipitation rate converted to 6-hour total"
+
+# CO2 experiment mapping
+co2_experiments:
+  - multiplier: 1.00
+    index: 0
+    directory: "era5_co2x1p00"
+
+  - multiplier: 1.25
+    index: 1
+    directory: "era5_co2x1p25"
+
+  - multiplier: 1.50
+    index: 2
+    directory: "era5_co2x1p50"
+
+  - multiplier: 1.75
+    index: 3
+    directory: "era5_co2x1p75"
+
+  - multiplier: 2.00
+    index: 4
+    directory: "era5_co2x2p00"
+
+  - multiplier: 2.25
+    index: 5
+    directory: "era5_co2x2p25"
+
+# Spatial grid info
+grid:
+  ace_resolution: [180, 360]  # lat, lon
+  lucie_resolution: [48, 96]  # lat, lon (different from ACE)
+  ace_lat_range: [-90, 90]
+  ace_lon_range: [0, 360]
+
+# Notes:
+# - ACE uses 180x360 grid (2 degree resolution)
+# - LUCIE uses 48x96 grid
+# - Variable names follow ACE output convention
+# - All variables extracted from autoregressive_predictions.nc

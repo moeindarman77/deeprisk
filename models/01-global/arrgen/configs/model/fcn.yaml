@@ -1,0 +1,4 @@
+# to use with time varying cfm
+_target_: arrgen.models.fcn.FCN
+n_hiddens_list: [256, 256]
+time_varying: true

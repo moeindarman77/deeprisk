@@ -1,0 +1,4 @@
+# defaults to be overridden by specific experiments
+
+batch_size: 2048  # global batch size.
+data_workers: 8

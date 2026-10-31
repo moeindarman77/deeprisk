@@ -1,0 +1,63 @@
+# DeepRisk GPU-Optimized Pipeline Configuration
+# Optimized for N GPUs GPUs with (GPU memory) memory each
+# Target: Process 29200 samples as fast as possible
+
+# Dataset configuration
+dataset:
+  co2_experiment_index: 0  # Will be overridden for each CO2 experiment (0-6)
+
+# EDM Model Configuration (01-global / intermediate downscaling)
+edm:
+  checkpoint_path: "<DEEPRISK_ROOT>/models/01-global/checkpoints/checkpoint-007862.pt"
+  stats_dir: "<DEEPRISK_ROOT>/models/01-global/stats"
+  condition_path: "<DEEPRISK_ROOT>/models/01-global/condition.npy"
+
+# L2 Transformer Model Configuration (02-regional / regional downscaling)
+l2:
+  checkpoint_path: "<DEEPRISK_ROOT>/models/02-regional/checkpoints/best_l2_model.pth"
+  config_path: "<DEEPRISK_ROOT>/models/02-regional/config/ERA5_config_final_transformer_based_L2.yaml"
+  use_conditioning: true
+  orography_path: "<DEEPRISK_ROOT>/models/02-regional/hrrr_orography_snapshot_with_stats.npz"
+
+# GPU-Optimized Pipeline Configuration
+pipeline:
+  max_samples: 29200  # Full dataset target
+  save_intermediate: true
+  batch_size: 64  # GPU optimized (will be auto-tuned)
+  memory_optimization: true  # Enable memory optimizations for GPU
+  use_mixed_precision: false  # Disabled per user request
+  streaming_save: true  # Save samples as they're generated
+  checkpoint_frequency: 100  # Save progress every 100 samples
+  
+# Data paths - GPU optimized with /scratch for fast local storage
+data:
+  lucie_path: "<LUCIE_DATA>/LUCIE_co2_sensitivity_experiments_combined.nc"
+  output_dir: "<OUTPUT_DIR>"  # Fast local SSD storage
+  temp_dir: "<TMP_DIR>"  # Temporary files on fast storage
+  
+# Multi-GPU configuration for GPU
+multi_gpu:
+  world_size: 8  # N GPUs GPUs
+  backend: "nccl"
+  find_unused_parameters: false
+  broadcast_buffers: false
+  
+# Memory optimization for GPU ((GPU memory) per GPU)
+memory:
+  max_memory_usage_gb: 130  # Leave 9GB headroom
+  enable_gradient_checkpointing: true
+  use_memory_efficient_attention: true
+  clear_cache_frequency: 10  # Clear GPU cache every 10 samples
+
+# GPU Performance optimizations
+performance:
+  enable_cudnn_benchmark: true
+  use_deterministic_algorithms: false  # Faster but non-deterministic
+  num_workers: 4  # Data loading workers per GPU
+  pin_memory: true
+  prefetch_factor: 2
+
+# Device configuration
+device:
+  use_gpu: true
+  gpu_id: 0  # Will be overridden in multi-GPU setup

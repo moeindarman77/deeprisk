@@ -1,0 +1,16 @@
+defaults:
+  - _self_
+  - trainer: defaults
+  - optimizer: adamw
+  - experiment: hrrr_3km
+  - system: ampere
+
+seed: 1234
+resume: "<ARRGEN_SRC>/src/results/hrrr_3km/20250804_001709/checkpoints"
+dry_run: false
+
+hydra:
+  run:
+    dir: results/${experiment_name}/${now:%Y%m%d_%H%M%S}
+  job:
+    chdir: true

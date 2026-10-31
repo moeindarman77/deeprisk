@@ -1,0 +1,6 @@
+_target_: arrgen.models.edm2_unet.UNet
+model_channels: 32
+attn_resolutions: [[16, 32], [8, 16]]
+channel_mult_noise: 1
+resample_filter: [1, 1]
+channel_mult: [2, 2, 2]

@@ -1,0 +1,10 @@
+# DDPM++ without attention
+_target_: arrgen.models.unet_sr.UNet
+in_channels : 5
+out_channels : 5
+inner_channel : 32
+norm_groups : 32
+channel_mults : [1,2, 4, 8, 16]
+attn_res : [8,16]
+res_blocks : 3
+dropout : 0

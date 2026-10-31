@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# SLURM / run logs
+*.out
+*.err
+slurm-*.out
+
+# Local holding area for superseded files (kept on disk, not shipped)
+_archive/
+
+# Generated pipeline outputs (write these to /space, not the repo)
+outputs/
+*.tmp
+
+# Model checkpoints (~2.2 GB total) are distributed out-of-band — see README
+# "Code and Data Availability". Keep the directories via .gitkeep.
+models/*/checkpoints/*.pt
+models/*/checkpoints/*.pth

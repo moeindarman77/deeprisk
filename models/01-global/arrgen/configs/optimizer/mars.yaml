@@ -1,0 +1,4 @@
+_target_: arrgen.training.optimizers.mars.MARS
+mars_type: mars-adamw
+lr: 0.001
+lr_1d: 0.001

@@ -1,0 +1,35 @@
+# DeepRisk Integrated Pipeline Configuration
+# Based on original pipeline.py settings
+
+# Dataset configuration
+dataset:
+  co2_experiment_index: 0  # Which CO2 experiment to use from LUCIE data
+
+# EDM Model Configuration (01-global / intermediate downscaling)
+edm:
+  checkpoint_path: "<DEEPRISK_ROOT>/models/01-global/checkpoints/checkpoint-007862.pt"
+  stats_dir: "<DEEPRISK_ROOT>/models/01-global/stats"
+  condition_path: "<DEEPRISK_ROOT>/models/01-global/condition.npy"
+
+# L2 Transformer Model Configuration (02-regional / regional downscaling)
+l2:
+  checkpoint_path: "<DEEPRISK_ROOT>/models/02-regional/checkpoints/best_l2_model.pth"
+  config_path: "<DEEPRISK_ROOT>/models/02-regional/config/ERA5_config_final_transformer_based_L2.yaml"
+  use_conditioning: true
+  orography_path: "<DEEPRISK_ROOT>/models/02-regional/hrrr_orography_snapshot_with_stats.npz"
+
+# Pipeline Configuration
+pipeline:
+  max_samples: 100  # Maximum number of samples to process
+  save_intermediate: true  # Save EDM intermediate outputs
+  batch_size: 1  # Process samples individually for memory efficiency
+  
+# Data paths
+data:
+  lucie_path: "<LUCIE_DATA>/LUCIE_co2_sensitivity_experiments_combined.nc"
+  output_dir: "<OUTPUT_DIR>"
+
+# Device configuration
+device:
+  use_gpu: true
+  gpu_id: 0  # Which GPU to use if multiple available

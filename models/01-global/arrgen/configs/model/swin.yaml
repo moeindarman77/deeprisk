@@ -1,0 +1,9 @@
+_target_: arrgen.models.swin.Swin
+window_size: [8, 8]
+shift_size: [4, 4]
+patch_size: [2, 4]
+depth: 24
+dim: 1024
+heads: 16
+head_dim: 64
+mlp_dim: 4098
